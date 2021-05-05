@@ -145,6 +145,10 @@ module.exports = NodeHelper.create({
       */
       this.log("Finish Album scanning. Properly scanned :", this.albums.length)
       for (var a of this.albums) {
+        if (a.coverPhotoBaseUrl == null) {
+          this.log("The coverPhotoBaseUrl is undefined for album: ", JSON.stringify(a))
+          continue
+        }
         var url = a.coverPhotoBaseUrl + "=w160-h160-c"
         var fpath = path.resolve(__dirname, "cache", a.id)
         let file = fs.createWriteStream(fpath)
