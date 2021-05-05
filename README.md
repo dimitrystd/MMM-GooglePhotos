@@ -1,3 +1,18 @@
+# My changes to the original code
+I have 300+ albums. Loading of all images takes tens of minutes (I didn't measure but it seems like half an hour). There is no reason to show ALL images during a single day. So I decided to automate the loading of albums set depending on the day of the week.
+And there is another small trick, depending on odd\even day it shows albums from the beginning or ending photo library.
+
+I added new parameter `repeatAfterDays` into configuration. It controls how many days will take to show all albums from photo library. An example, if `repeatAfterDays = 7` and I have 300 albums, then it will show 43 albums every day during 7 days.
+```javascript
+{
+  module: "MMM-GooglePhotos",
+  position: "top_right",
+  config: {
+        albums: [], // This parameter is ignored in my implementation
+        repeatAfterDays: 7, // 10 days by default
+        ... rest parameters are the same ...
+```
+
 # MMM-GooglePhotos
 Display your photos from album of Google Photos on MagicMirror
 

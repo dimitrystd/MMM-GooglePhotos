@@ -72,6 +72,7 @@ module.exports = NodeHelper.create({
   initializeAfterLoading: function(config) {
     this.config = config
     this.debug = (config.debug) ? config.debug : false
+    this.repeatAfterDays = (config.repeatAfterDays) ? config.repeatAfterDays : 10
     if (!this.config.scanInterval || this.config.scanInterval < 1000 * 60 * 10) this.config.scanInterval = 1000 * 60 * 10
     GPhotos = new GP({
       authOption: authOption,
@@ -108,6 +109,25 @@ module.exports = NodeHelper.create({
           this.log("Can't find uploadable album :", config.uploadAlbum)
         }
       }
+      // Filter albums by my pattern and sort
+      albums = albums
+        .filter(x => /^\d{6}/.test(x.title))
+        .sort((a, b) => a.title.localeCompare(b.title, undefined, { sensitivity: 'accent' }))
+      this.log(`Found ${albums.length} albums`)
+      // We can't show more days than you have total albums
+      const repeatAfterDays = Math.min(this.repeatAfterDays, albums.length);
+      const albumsPerDay = Math.ceil(albums.length / repeatAfterDays)
+      this.log(`Show ${albumsPerDay} albums per day`)
+      let dayIndex=moment().dayOfYear() % repeatAfterDays
+      this.log(`Today is ${dayIndex} of show day`)
+      // Show from the end of list every other day
+      // So it will show albums from different sides of `albums` array
+      dayIndex = (moment().dayOfYear() % 2  == 0) ? dayIndex : repeatAfterDays - dayIndex;
+      this.log(`Adjust show day is ${dayIndex}`)
+      const offset = dayIndex * albumsPerDay
+      this.albums = albums.slice(offset, offset + albumsPerDay)
+      this.log("Finish Album scanning. Properly scanned :", this.albums.length)
+      /* Don't need to filter by `config.albums`
       for (var ta of this.config.albums) {
         var matched = albums.find((a)=>{
           if (ta == a.title) return true
@@ -122,6 +142,7 @@ module.exports = NodeHelper.create({
           this.albums.push(matched)
         }
       }
+      */
       this.log("Finish Album scanning. Properly scanned :", this.albums.length)
       for (var a of this.albums) {
         var url = a.coverPhotoBaseUrl + "=w160-h160-c"
